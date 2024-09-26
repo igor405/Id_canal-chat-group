@@ -1,8 +1,9 @@
+import os
 import re
 from telethon import TelegramClient, events
 from dotenv import load_dotenv
 
-# Загрузка переменных окружения
+# Загрузка переменных окружения из .env файла
 load_dotenv()
 
 API_ID = os.getenv('API_ID')
