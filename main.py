@@ -16,18 +16,21 @@ bot = TelegramClient('bot', API_ID, API_HASH).start(bot_token=BOT_TOKEN)
 # Обработчик пересланных сообщений
 @bot.on(events.NewMessage)
 async def handler(event):
-    if event.message.is_forwarded:
-        # Получение информации о пересланном сообщении
-        forward_info = event.message.forward
-        if forward_info.chat:
-            chat = forward_info.chat
+    message = event.message
+    
+    # Проверка, переслано ли сообщение
+    if message.fwd_from:
+        forward_info = message.fwd_from
+        if forward_info.from_id:
+            chat_id = forward_info.from_id.channel_id or forward_info.from_id.chat_id
+            chat = await bot.get_entity(forward_info.from_id)
             chat_info = f"Chat ID: {chat.id}\n" \
                         f"Title: {chat.title}\n" \
                         f"Username: {chat.username}\n" \
-                        f"Type: {chat.type}"
+                        f"Type: {chat.__class__.__name__}"
             await event.reply(chat_info)
         else:
-            await event.reply("Перешлите сообщение из канала, группы или чата.")
+            await event.reply("Не удалось получить информацию о чате.")
     else:
         await event.reply("Пожалуйста, пересланное сообщение должно быть из канала или чата.")
 
