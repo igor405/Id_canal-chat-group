@@ -22,13 +22,19 @@ async def handler(event):
     if message.fwd_from:
         forward_info = message.fwd_from
         if forward_info.from_id:
-            chat_id = forward_info.from_id.channel_id or forward_info.from_id.chat_id
-            chat = await bot.get_entity(forward_info.from_id)
-            chat_info = f"Chat ID: {chat.id}\n" \
-                        f"Title: {chat.title}\n" \
-                        f"Username: {chat.username}\n" \
-                        f"Type: {chat.__class__.__name__}"
-            await event.reply(chat_info)
+            # Попробуем получить ID канала или чата
+            try:
+                if hasattr(forward_info.from_id, 'channel_id'):
+                    chat_id = forward_info.from_id.channel_id
+                else:
+                    chat_id = forward_info.from_id.chat_id
+
+                # Возвращаем только ID, если это приватный канал, без попытки получить другие данные
+                chat_info = f"Chat ID: {chat_id}\n"
+                await event.reply(chat_info)
+            
+            except AttributeError:
+                await event.reply("Не удалось определить тип чата.")
         else:
             await event.reply("Не удалось получить информацию о чате.")
     else:
